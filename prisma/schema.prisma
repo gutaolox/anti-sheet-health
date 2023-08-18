@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(uuid())
+  email        String         @unique
+  name         String?
+  password     String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  Meal         Meal[]
+  Exercise     Exercise[]
+  HealthStatus HealthStatus[]
+
+  @@map("users")
+}
+
+model Meal {
+  id            String        @id @default(uuid())
+  meal          String
+  userId        String
+  category      String
+  user          User          @relation(fields: [userId], references: [id])
+  content       Ingredients[]
+  mealBeginTime DateTime      @default(now())
+  mealEndTime   DateTime
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@map("posts")
+}
+
+model Ingredients {
+  id        String   @id @default(uuid())
+  name      String
+  mealId    String
+  meal      Meal     @relation(fields: [mealId], references: [id])
+  quantity  Int
+  unit      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ingredients")
+}
+
+model Exercise {
+  id            String   @id @default(uuid())
+  name          String
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  category      String
+  restTimeInSec Int
+  sets          Int
+  times         Int
+  duration      Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("exercises")
+}
+
+model HealthStatus {
+  id        String     @id @default(uuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id])
+  weight    Float
+  measures  Measures[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@map("weights")
+}
+
+model Measures {
+  id             String       @id @default(uuid())
+  measure        Float
+  healthStatusId String
+  healthStatus   HealthStatus @relation(fields: [healthStatusId], references: [id])
+  unit           Float
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("measures")
+}
