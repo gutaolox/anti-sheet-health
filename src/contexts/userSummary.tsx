@@ -1,20 +1,25 @@
 "use client";
 
-import { ExerciseInterface } from "@/interfaces/exercise";
-import { HealthStatusInterface } from "@/interfaces/healthStatus";
-import { MealInterface } from "@/interfaces/meal";
-import { UserInterface, UserSummaryInterface } from "@/interfaces/userSummary";
+import {
+  ExerciseInterface,
+  HealthStatusInterface,
+  MealInterface,
+  UserInterface,
+  UserSummaryInterface,
+} from "@/interfaces";
 import { customAxios } from "@/lib/customAxios";
+import { getUser } from "@/lib/services/user";
 import { createContext, ReactNode, useState, useEffect } from "react";
 
 interface UserSummaryContextType {
   user: UserInterface;
-  meals: MealInterface[];
-  healthStatus: HealthStatusInterface;
   exercises: ExerciseInterface[];
-  setMealsInfo: (newMeals: MealInterface[]) => void;
-  setExerciseInfo: (newExercises: ExerciseInterface[]) => void;
-  setHealthStatusInfo: (newHealthStatus: HealthStatusInterface) => void;
+  healthStatus: HealthStatusInterface;
+  meals: MealInterface[];
+  setMealState: (meal: MealInterface[]) => void;
+  setExerciseState: (exercise: ExerciseInterface[]) => void;
+  setHealthStatusState: (healthStatus: HealthStatusInterface) => void;
+  setWeightState: (weight: number) => void;
 }
 
 export const UserSummaryContext = createContext({} as UserSummaryContextType);
@@ -27,35 +32,38 @@ export function UserSummaryHealthStatusContextProvider({
   children,
 }: UserSummaryContextProviderProps) {
   const [user, setUser] = useState<UserInterface>({} as UserInterface);
+  const [exercises, setExercises] = useState<ExerciseInterface[]>([]);
   const [healthStatus, setHealthStatus] = useState<HealthStatusInterface>(
     {} as HealthStatusInterface
   );
-  const [meals, setMeals] = useState<MealInterface[]>({} as MealInterface[]);
-  const [exercises, setExercises] = useState<ExerciseInterface[]>(
-    {} as ExerciseInterface[]
-  );
+  const [meals, setMeals] = useState<MealInterface[]>([]);
 
-  function setMealsInfo(newMeals: MealInterface[]) {
-    setMeals(newMeals);
+  function setMealState(meal: MealInterface[]) {
+    setMeals(meal);
   }
 
-  function setExerciseInfo(newExercises: ExerciseInterface[]) {
-    setExercises(newExercises);
+  function setExerciseState(exercise: ExerciseInterface[]) {
+    setExercises(exercise);
   }
 
-  function setHealthStatusInfo(newHealthStatus: HealthStatusInterface) {
-    setHealthStatus(newHealthStatus);
+  function setHealthStatusState(healthStatus: HealthStatusInterface) {
+    setHealthStatus(healthStatus);
+  }
+
+  function setWeightState(weight: number) {
+    setHealthStatus((previousState) => ({
+      ...previousState,
+      weight,
+    }));
   }
 
   async function getUserData() {
-    const { data } = await customAxios(false).get<{
-      summary: UserSummaryInterface;
-    }>("/userSummary");
-    const { healthStatus, exercises, meals, ...user } = data.summary;
+    const { data } = await getUser();
+    const { exercises, healthStatus, meals, ...user } = data.summary;
     setUser(user);
-    setHealthStatus(healthStatus[0] ?? ({} as HealthStatusInterface));
-    setMeals(meals);
     setExercises(exercises);
+    setHealthStatus(healthStatus[0]);
+    setMeals(meals);
   }
 
   useEffect(() => {
@@ -69,9 +77,10 @@ export function UserSummaryHealthStatusContextProvider({
         exercises,
         healthStatus,
         meals,
-        setExerciseInfo,
-        setHealthStatusInfo,
-        setMealsInfo,
+        setMealState,
+        setExerciseState,
+        setHealthStatusState,
+        setWeightState,
       }}
     >
       {children}

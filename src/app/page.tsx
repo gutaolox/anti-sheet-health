@@ -3,14 +3,11 @@
 import { UserSummaryContext } from "@/contexts/userSummary";
 import { Button } from "@mui/material";
 import { useContext } from "react";
-import { DateControl } from "./components/DateControl";
-import { HealthStatus } from "./components/HealthStatus";
-import { Meal } from "./components/Meal";
-import { Exercise } from "./components/Excercise";
+import { DateControl, Exercise, HealthStatus, Meal } from "./components";
 
 export default function Home() {
-  const { userSummary } = useContext(UserSummaryContext);
-  console.log(userSummary);
+  //const { userSummary } = useContext(UserSummaryContext);
+  //console.log(userSummary);
   return (
     <>
       <main>
